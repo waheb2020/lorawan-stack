@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- MAC settings configuration when creating and editing end device in the Console.
+
 ### Changed
 
 ### Deprecated
