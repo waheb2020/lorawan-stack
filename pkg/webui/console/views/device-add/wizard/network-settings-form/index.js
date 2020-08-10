@@ -22,6 +22,8 @@ import { withBreadcrumb } from '@ttn-lw/components/breadcrumbs/context'
 import Wizard from '@ttn-lw/components/wizard'
 import Form from '@ttn-lw/components/form'
 
+import MacSettingsSection from '@console/components/mac-settings-section'
+
 import DevAddrInput from '@console/containers/dev-addr-input'
 import { NsFrequencyPlansSelect } from '@console/containers/freq-plans-select'
 
@@ -29,6 +31,7 @@ import sharedMessages from '@ttn-lw/lib/shared-messages'
 import PropTypes from '@ttn-lw/lib/prop-types'
 
 import {
+  DEVICE_CLASSES,
   ACTIVATION_MODES,
   LORAWAN_VERSIONS,
   LORAWAN_PHY_VERSIONS,
@@ -94,6 +97,20 @@ const NetworkSettingsForm = props => {
     setResetsFCnt(checked)
   }, [])
 
+  const [deviceClass, setDeviceClass] = React.useState(DEVICE_CLASSES.CLASS_A)
+  const handleDeviceClassChange = React.useCallback(evt => {
+    const { checked, name } = evt.target
+
+    if (name === 'supports_class_c' && checked) {
+      setDeviceClass(DEVICE_CLASSES.CLASS_C)
+    } else if (name === 'supports_class_b' && checked) {
+      setDeviceClass(DEVICE_CLASSES.CLASS_B)
+    } else {
+      setDeviceClass(DEVICE_CLASSES.CLASS_A)
+    }
+  }, [])
+
+  const isClassB = deviceClass === DEVICE_CLASSES.CLASS_B
   const isABP = activationMode === ACTIVATION_MODES.ABP
   const isMulticast = activationMode === ACTIVATION_MODES.MULTICAST
   const lwVersion = parseLorawanMacVersion(lorawanVersion)
@@ -104,10 +121,12 @@ const NetworkSettingsForm = props => {
 
   const validationContext = React.useMemo(
     () => ({
+      isClassB,
       activationMode,
     }),
-    [activationMode],
+    [activationMode, isClassB],
   )
+
   const initialFormValues = React.useMemo(
     () =>
       validationSchema.cast(
@@ -154,6 +173,7 @@ const NetworkSettingsForm = props => {
         title={sharedMessages.supportsClassC}
         name="supports_class_c"
         component={Checkbox}
+        onChange={handleDeviceClassChange}
       />
       {(isMulticast || isABP) && (
         <>
@@ -218,6 +238,11 @@ const NetworkSettingsForm = props => {
           )}
         </>
       )}
+      <MacSettingsSection
+        activationMode={activationMode}
+        deviceClass={deviceClass}
+        initiallyCollapsed={!isClassB}
+      />
     </Wizard.Form>
   )
 }
