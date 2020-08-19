@@ -17,6 +17,20 @@ import sharedMessages from '@ttn-lw/lib/shared-messages'
 
 import { parseLorawanMacVersion, ACTIVATION_MODES } from '@console/lib/device-utils'
 
+const factoryPresetFreqNumericTest = frequencies => {
+  return frequencies.every(freq => {
+    if (typeof freq !== 'undefined') {
+      return !isNaN(parseInt(freq))
+    }
+
+    return true
+  })
+}
+
+const factoryPresetFreqRequiredTest = frequencies => {
+  return frequencies.every(freq => typeof freq !== 'undefined' && freq !== '')
+}
+
 const validationSchema = Yup.object()
   .shape({
     _activation_mode: Yup.mixed()
@@ -86,15 +100,90 @@ const validationSchema = Yup.object()
         return schema.strip()
       },
     ),
-    mac_settings: Yup.object().when(['_activation_mode'], (mode, schema) => {
-      if (mode === ACTIVATION_MODES.ABP) {
+    mac_settings: Yup.object().when(
+      ['_activation_mode', 'supports_class_b'],
+      (mode, isClassB, schema) => {
         return schema.shape({
-          resets_f_cnt: Yup.boolean(),
-        })
-      }
+          rx1_delay: Yup.lazy(delay => {
+            if (
+              !Boolean(delay) ||
+              typeof delay.value === 'undefined' ||
+              mode !== ACTIVATION_MODES.ABP
+            ) {
+              return Yup.object().strip()
+            }
 
-      return schema.strip()
-    }),
+            return schema.shape({
+              value: Yup.number()
+                .min(1, Yup.passValues(sharedMessages.validateNumberGte))
+                .max(15, Yup.passValues(sharedMessages.validateNumberLte)),
+            })
+          }),
+          rx1_data_rate_offset: Yup.lazy(() => {
+            if (mode !== ACTIVATION_MODES.ABP) {
+              return Yup.number().strip()
+            }
+
+            return Yup.number()
+              .min(0, Yup.passValues(sharedMessages.validateNumberGte))
+              .max(7, Yup.passValues(sharedMessages.validateNumberLte))
+          }),
+          resets_f_cnt: Yup.lazy(() => {
+            if (mode !== ACTIVATION_MODES.ABP) {
+              return Yup.boolean().strip()
+            }
+
+            return Yup.boolean().default(false)
+          }),
+          rx2_data_rate_index: Yup.lazy(dataRate => {
+            if (!Boolean(dataRate) || typeof dataRate.value === 'undefined') {
+              return Yup.object().strip()
+            }
+
+            return Yup.object({
+              value: Yup.number()
+                .min(0, Yup.passValues(sharedMessages.validateNumberGte))
+                .max(15, Yup.passValues(sharedMessages.validateNumberLte)),
+            })
+          }),
+          rx2_frequency: Yup.number().min(100000, Yup.passValues(sharedMessages.validateNumberGte)),
+          ping_slot_periodicity: Yup.lazy(periodicity => {
+            if (!Boolean(periodicity) || typeof periodicity.value === 'undefined' || !isClassB) {
+              return Yup.object().strip()
+            }
+
+            return Yup.object({
+              value: Yup.string(),
+            })
+          }),
+          ping_slot_frequency: Yup.lazy(() => {
+            if (!isClassB) {
+              return Yup.number().strip()
+            }
+
+            return Yup.number().min(100000, Yup.passValues(sharedMessages.validateNumberGte))
+          }),
+          factory_preset_frequencies: Yup.lazy(frequencies => {
+            if (!Boolean(frequencies)) {
+              return Yup.array().strip()
+            }
+
+            return Yup.array()
+              .default([])
+              .test(
+                'is-valid-frequency',
+                sharedMessages.validateFreqNumberic,
+                factoryPresetFreqNumericTest,
+              )
+              .test(
+                'is-empty-frequency',
+                sharedMessages.validateFreqRequired,
+                factoryPresetFreqRequiredTest,
+              )
+          }),
+        })
+      },
+    ),
   })
   .noUnknown()
 
