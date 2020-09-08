@@ -14,6 +14,7 @@
 
 import React from 'react'
 
+import Radio from '@ttn-lw/components/radio-button'
 import Input from '@ttn-lw/components/input'
 import Checkbox from '@ttn-lw/components/checkbox'
 import Select from '@ttn-lw/components/select'
@@ -40,6 +41,8 @@ import {
 } from '@console/lib/device-utils'
 
 import validationSchema from './validation-schema'
+
+const excludePaths = ['_device_class']
 
 const lorawanPhyMap = {
   100: [{ value: '1.0.0', label: 'PHY V1.0' }],
@@ -70,8 +73,6 @@ const getLorawanPhyByVersion = version => {
 const defaultFormValues = {
   lorawan_phy_version: '',
   frequency_plan_id: '',
-  supports_class_c: false,
-  supports_class_b: false,
   mac_settings: {
     resets_f_cnt: false,
   },
@@ -97,18 +98,9 @@ const NetworkSettingsForm = props => {
     setResetsFCnt(checked)
   }, [])
 
-  const [deviceClass, setDeviceClass] = React.useState(DEVICE_CLASSES.CLASS_A)
-  const handleDeviceClassChange = React.useCallback(evt => {
-    const { checked, name } = evt.target
-
-    if (name === 'supports_class_c' && checked) {
-      setDeviceClass(DEVICE_CLASSES.CLASS_C)
-    } else if (name === 'supports_class_b' && checked) {
-      setDeviceClass(DEVICE_CLASSES.CLASS_B)
-    } else {
-      setDeviceClass(DEVICE_CLASSES.CLASS_A)
-    }
-  }, [])
+  const [deviceClass, setDeviceClass] = React.useState(
+    activationMode === ACTIVATION_MODES.MULTICAST ? DEVICE_CLASSES.CLASS_B : DEVICE_CLASSES.CLASS_A,
+  )
 
   const isClassB = deviceClass === DEVICE_CLASSES.CLASS_B
   const isABP = activationMode === ACTIVATION_MODES.ABP
@@ -145,6 +137,7 @@ const NetworkSettingsForm = props => {
       initialValues={initialFormValues}
       validationSchema={validationSchema}
       validationContext={validationContext}
+      excludePaths={excludePaths}
       error={error}
     >
       <NsFrequencyPlansSelect required autoFocus name="frequency_plan_id" />
@@ -164,17 +157,21 @@ const NetworkSettingsForm = props => {
         options={lorawanPhyVersionOptions}
       />
       <Form.Field
-        title={sharedMessages.supportsClassB}
-        name="supports_class_b"
-        component={Checkbox}
-        onChange={handleDeviceClassChange}
-      />
-      <Form.Field
-        title={sharedMessages.supportsClassC}
-        name="supports_class_c"
-        component={Checkbox}
-        onChange={handleDeviceClassChange}
-      />
+        title={sharedMessages.deviceClass}
+        onChange={setDeviceClass}
+        name="_device_class"
+        component={Radio.Group}
+        horizontal={false}
+        required
+      >
+        <Radio
+          label={sharedMessages.supportsClassA}
+          value={DEVICE_CLASSES.CLASS_A}
+          disabled={isMulticast}
+        />
+        <Radio label={sharedMessages.supportsClassB} value={DEVICE_CLASSES.CLASS_B} />
+        <Radio label={sharedMessages.supportsClassC} value={DEVICE_CLASSES.CLASS_C} />
+      </Form.Field>
       {(isMulticast || isABP) && (
         <>
           <DevAddrInput

@@ -35,8 +35,12 @@ const validationSchema = Yup.object({
   frequency_plan_id: Yup.string().required(sharedMessages.validateRequired),
   lorawan_version: Yup.string().required(sharedMessages.validateRequired),
   lorawan_phy_version: Yup.string().required(sharedMessages.validateRequired),
-  supports_class_b: Yup.boolean().default(false),
-  supports_class_c: Yup.boolean().default(false),
+  supports_class_b: Yup.boolean().when(['_device_class'], (devClass, schema) =>
+    schema.transform(() => undefined).default(devClass === DEVICE_CLASSES.CLASS_B),
+  ),
+  supports_class_c: Yup.boolean().when(['_device_class'], (devClass, schema) =>
+    schema.transform(() => undefined).default(devClass === DEVICE_CLASSES.CLASS_C),
+  ),
   supports_join: Yup.boolean().default(false),
   multicast: Yup.boolean().default(false),
   mac_settings: Yup.object({
