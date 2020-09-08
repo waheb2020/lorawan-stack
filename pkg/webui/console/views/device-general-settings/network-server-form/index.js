@@ -16,7 +16,6 @@ import React from 'react'
 
 import SubmitButton from '@ttn-lw/components/submit-button'
 import SubmitBar from '@ttn-lw/components/submit-bar'
-import Checkbox from '@ttn-lw/components/checkbox'
 import Input from '@ttn-lw/components/input'
 import Radio from '@ttn-lw/components/radio-button'
 import Select from '@ttn-lw/components/select'
@@ -73,35 +72,18 @@ const NetworkServerForm = React.memo(props => {
     parseLorawanMacVersion(device.lorawan_version),
   )
 
-  const [deviceClass, setDeviceClass] = React.useState(() => {
-    if (supports_class_c) {
-      return DEVICE_CLASSES.CLASS_C
-    }
+  const initialDeviceClass = supports_class_c
+    ? DEVICE_CLASSES.CLASS_C
+    : supports_class_b
+    ? DEVICE_CLASSES.CLASS_B
+    : DEVICE_CLASSES.CLASS_A
+  const [deviceClass, setDeviceClass] = React.useState(initialDeviceClass)
 
-    if (supports_class_b) {
-      return DEVICE_CLASSES.CLASS_B
-    }
-
-    return DEVICE_CLASSES.CLASS_A
-  })
-  const handleDeviceClassChange = React.useCallback(evt => {
-    const { checked, name } = evt.target
-
-    if (name === 'supports_class_c' && checked) {
-      setDeviceClass(DEVICE_CLASSES.CLASS_C)
-    } else if (name === 'supports_class_b' && checked) {
-      setDeviceClass(DEVICE_CLASSES.CLASS_B)
-    } else {
-      setDeviceClass(DEVICE_CLASSES.CLASS_A)
-    }
-  }, [])
-
-  let activationMode = ACTIVATION_MODES.ABP
-  if (supports_join) {
-    activationMode = ACTIVATION_MODES.OTAA
-  } else if (multicast) {
-    activationMode = ACTIVATION_MODES.MULTICAST
-  }
+  const initialActivationMode = supports_join
+    ? ACTIVATION_MODES.OTAA
+    : multicast
+    ? ACTIVATION_MODES.MULTICAST
+    : ACTIVATION_MODES.ABP
 
   const validationContext = React.useMemo(
     () => ({
@@ -116,16 +98,16 @@ const NetworkServerForm = React.memo(props => {
   const initialValues = React.useMemo(
     () =>
       validationSchema.cast(
-        { ...device, _activation_mode: activationMode },
+        { ...device, _activation_mode: initialActivationMode, _device_class: initialDeviceClass },
         { context: validationContext },
       ),
-    [activationMode, device, validationContext],
+    [device, initialActivationMode, initialDeviceClass, validationContext],
   )
 
   const onFormSubmit = React.useCallback(
     async (values, { resetForm, setSubmitting }) => {
       const castedValues = validationSchema.cast(values, { context: validationContext })
-      const updatedValues = diff(initialValues, castedValues, ['_activation_mode'])
+      const updatedValues = diff(initialValues, castedValues, ['_activation_mode', '_device_class'])
 
       setError('')
       try {
@@ -217,17 +199,21 @@ const NetworkServerForm = React.memo(props => {
       />
       <NsFrequencyPlansSelect name="frequency_plan_id" required />
       <Form.Field
-        title={sharedMessages.supportsClassB}
-        name="supports_class_b"
-        component={Checkbox}
-        onChange={handleDeviceClassChange}
-      />
-      <Form.Field
-        title={sharedMessages.supportsClassC}
-        name="supports_class_c"
-        component={Checkbox}
-        onChange={handleDeviceClassChange}
-      />
+        title={sharedMessages.deviceClass}
+        onChange={setDeviceClass}
+        name="_device_class"
+        component={Radio.Group}
+        horizontal={false}
+        required
+      >
+        <Radio
+          label={sharedMessages.supportsClassA}
+          value={DEVICE_CLASSES.CLASS_A}
+          disabled={isMulticast}
+        />
+        <Radio label={sharedMessages.supportsClassB} value={DEVICE_CLASSES.CLASS_B} />
+        <Radio label={sharedMessages.supportsClassC} value={DEVICE_CLASSES.CLASS_C} />
+      </Form.Field>
       <Form.Field
         title={sharedMessages.activationMode}
         disabled
@@ -296,7 +282,7 @@ const NetworkServerForm = React.memo(props => {
           )}
         </>
       )}
-      <MacSettingsSection activationMode={activationMode} deviceClass={deviceClass} />
+      <MacSettingsSection activationMode={initialActivationMode} deviceClass={deviceClass} />
       <SubmitBar>
         <Form.Submit component={SubmitButton} message={sharedMessages.saveChanges} />
       </SubmitBar>
