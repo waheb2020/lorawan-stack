@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import TTN from 'ttn-lw'
+
 import stringToHash from '../../pkg/webui/lib/string-to-hash'
 
 // Helper function to quickly login to the oauth app programmatically.
@@ -146,6 +148,53 @@ Cypress.Commands.add('setApplicationCollaborator', (applicationId, collaboratorI
   })
 })
 
+// Overwrite the default `type` to make sure that subject is resolved and focused before simulating typing. This is helpful
+// when:
+// 1. The action is forced via the `forced` option for inputs that are visually hidden for styling purposes.
+// 2. The action is performed during minor layout shifts.
+Cypress.Commands.overwrite('type', (originalFn, subject, ...args) => {
+  subject.focus()
+
+  return originalFn(subject, ...args)
+})
+
+// Overwrite the default `click` to make sure that subject is resolved and focused before simulating clicks. This is helpful
+// when:
+// 1. The action is forced via the `forced` option for elements that are visually hidden for styling purposes.
+// 2. The action is performed during minor layout shifts.
+Cypress.Commands.overwrite('click', (originalFn, subject, ...args) => {
+  subject.focus()
+
+  return originalFn(subject, ...args)
+})
+
+Cypress.Commands.add('withUserContext', user => {
+  cy.loginConsole({ user_id: user.ids.user_id, password: user.password }).then(() => {
+    const token = JSON.parse(window.localStorage.getItem(`accessToken-${stringToHash('/console')}`))
+    expect(token).to.have.property('access_token')
+
+    const ttnClient = new TTN(token.access_token, {
+      stackConfig: {
+        is: Cypress.config('isBaseUrl'),
+        as: Cypress.config('asBaseUrl'),
+        ns: Cypress.config('nsBaseUrl'),
+        js: Cypress.config('jsBaseUrl'),
+        gs: Cypress.config('gsBaseUrl'),
+      },
+      connectionType: 'http',
+    })
+
+    return {
+      createApplication: application =>
+        ttnClient.Applications.create(user.ids.user_id, application),
+      done: () => {
+        cy.clearCookies()
+        cy.clearLocalStorage()
+      },
+    }
+  })
+})
+
 // Helper function to quickly seed the database to a fresh state using a
 // previously generated sql dump.
 Cypress.Commands.add('dropAndSeedDatabase', () => {
@@ -179,7 +228,7 @@ const getFieldDescriptorByLabel = label => {
     .get('@field')
     .invoke('attr', 'aria-describedby')
     .then(describedBy => {
-      return cy.get(`[id=${describedBy}]`)
+      return cy.get(`[id="${describedBy}"]`)
     })
 }
 
