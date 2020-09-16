@@ -4,11 +4,11 @@ description: ""
 weight: 3
 ---
 
-This section contains instructions on how to migrate devices from ChirpStack to {{% tts %}}.
+This section contains instructions on how to migrate end devices from ChirpStack to {{% tts %}}.
 
 <!--more-->
 
-Devices and applications can easily be migrated from ChirpStack to {{% tts %}} with the `ttn-lw-migrate` tool. This tool is used for exporting devices and applications to a [JSON file]({{< ref "getting-started/migrating-from-networks/device-json.md" >}}) containing their description. This file can later be imported in {{% tts %}} as described in the [Import End Devices in The Things Stack]({{< ref "getting-started/migrating-from-networks/import-devices.md" >}}) section.
+End devices and applications can easily be migrated from ChirpStack to {{% tts %}} with the `ttn-lw-migrate` tool. This tool is used for exporting end devices and applications to a [JSON file]({{< ref "getting-started/migrating-from-networks/device-json.md" >}}) containing their description. This file can later be imported in {{% tts %}} as described in the [Import End Devices in The Things Stack]({{< ref "getting-started/migrating-from-networks/import-devices.md" >}}) section.
 
 First, configure the environment with the following variables modified according to your setup:
 
@@ -21,17 +21,17 @@ $ export FREQUENCY_PLAN_ID="EU_863_870"         # Set FrequencyPlanID for export
 
 >Note: `JoinEUI` and `FrequencyPlanID` have to be set because ChirpStack does not store these variables.
 
-## Export Devices
+## Export End Devices
 
-With `ttn-lw-migrate` tool you can export a single or multiple devices based on their `DevEUI`.
+With `ttn-lw-migrate` tool you can export a single or multiple end devices based on their `DevEUI`.
 
-To export a single device's description to a `device.json` file, use the following command in your terminal:
+To export a single end device's description to a `device.json` file, use the following command in your terminal:
 
 ```bash
 $ ttn-lw-migrate --source chirpstack device "0102030405060701" > device.json
 ```
 
-To export multiple devices, you need to create a `.txt` file containing one DevEUI per line as in example below.
+To export multiple end devices, you need to create a `.txt` file containing one DevEUI per line as in example below.
 
 <details><summary>Example of devices.txt</summary>
 
@@ -46,7 +46,7 @@ To export multiple devices, you need to create a `.txt` file containing one DevE
 
 </details>
 
-To export multiple devices to a `devices.json` file, run the following command in your terminal:
+To export multiple end devices to a `devices.json` file, run the following command in your terminal:
 
 ```bash
 $ ttn-lw-migrate --source chirpstack device < devices.txt > devices.json
@@ -54,21 +54,21 @@ $ ttn-lw-migrate --source chirpstack device < devices.txt > devices.json
 
 ## Export Applications
 
-You can also export applications with `ttn-lw-migrate` tool using their names, which results with a JSON file containing descriptions of all the devices that the application contains.
+You can also export applications with `ttn-lw-migrate` tool using their names, which results with a JSON file containing descriptions of all the end devices that the application contains.
 
-Use the following command to export a single application:
+Use the following command to export end devices from a single application:
 
 ```bash
 $ ttn-lw-migrate --source chirpstack application "app1" > application.json
 ```
 
-To export multiple applications to an `applications.json` file, you need to create a `.txt` file containing one application name per line and run the following command in your terminal:
+To export end devices from multiple applications to an `applications.json` file, you need to create a `.txt` file containing one application name per line and run the following command in your terminal:
 
 ```bash
 $ ttn-lw-migrate --source chirpstack application < applications.txt > applications.json
 ```
 
 >**Notes**: 
->- ABP devices without an active session can be exported from ChirpStack, but cannot be imported in {{% tts %}}.
+>- ABP end devices without an active session can be exported from ChirpStack, but cannot be imported in {{% tts %}}.
 >- `MaxEIRP` parameter may not be always set properly.
 >- ChirpStack `variables` parameter related to payload formatting will always be converted to `null` when the device is imported to {{% tts %}}.
