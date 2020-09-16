@@ -71,4 +71,4 @@ $ ttn-lw-migrate --source chirpstack application < applications.txt > applicatio
 >**Notes**: 
 >- ABP end devices without an active session can be exported from ChirpStack, but cannot be imported in {{% tts %}}.
 >- `MaxEIRP` parameter may not be always set properly.
->- ChirpStack `variables` parameter related to payload formatting will always be converted to `null` when the device is imported to {{% tts %}}.
+>- ChirpStack `variables` parameter related to payload formatting will always be converted to `null` when the end device is imported to {{% tts %}}.
