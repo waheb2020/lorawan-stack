@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Meta information and status events in the event views in the Console.
 
 ### Changed
 - Detail view of events in the Console moved to the side.
@@ -18,8 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 ### Fixed
- - Performance issues of event views in the Console (freezing after some time).
-
+- Performance issues of event views in the Console (freezing after some time).
+- Improved error resilience and stability of the event views in the Console.
 - Gateway Server panic on upstream message handling.
 - Incorrect redirects for restricted routes in the Console.
 
