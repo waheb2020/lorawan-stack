@@ -14,6 +14,8 @@
 
 import React from 'react'
 
+import glossaryId from '@console/constants/glossary-ids'
+
 import Input from '@ttn-lw/components/input'
 import Checkbox from '@ttn-lw/components/checkbox'
 import Select from '@ttn-lw/components/select'
@@ -127,7 +129,12 @@ const NetworkSettingsForm = props => {
       validationContext={validationContext}
       error={error}
     >
-      <NsFrequencyPlansSelect required autoFocus name="frequency_plan_id" />
+      <NsFrequencyPlansSelect
+        required
+        autoFocus
+        glossaryId={glossaryId.FREQUENCY_PLAN}
+        name="frequency_plan_id"
+      />
       <Form.Field
         required
         disabled
@@ -135,6 +142,7 @@ const NetworkSettingsForm = props => {
         name="lorawan_version"
         component={Select}
         options={LORAWAN_VERSIONS}
+        glossaryId={glossaryId.LORAWAN_VERSION}
       />
       <Form.Field
         required
@@ -142,11 +150,13 @@ const NetworkSettingsForm = props => {
         name="lorawan_phy_version"
         component={Select}
         options={lorawanPhyVersionOptions}
+        glossaryId={glossaryId.REGIONAL_PARAMETERS}
       />
       <Form.Field
         title={sharedMessages.supportsClassC}
         name="supports_class_c"
         component={Checkbox}
+        glossaryId={glossaryId.CLASS_C}
       />
       {(isMulticast || isABP) && (
         <>
@@ -180,6 +190,7 @@ const NetworkSettingsForm = props => {
             }
             component={Input.Generate}
             onGenerateValue={generate16BytesKey}
+            glossaryId={glossaryId.NETWORK_SESSION_KEY}
           />
           {lwVersion >= 110 && (
             <Form.Field

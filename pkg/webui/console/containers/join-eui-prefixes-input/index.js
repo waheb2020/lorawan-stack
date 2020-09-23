@@ -39,6 +39,7 @@ const JoinEUIPrefixesField = function({
   fetching,
   getPrefixes,
   showPrefixes,
+  ...rest
 }) {
   useEffect(() => {
     getPrefixes()
@@ -58,6 +59,7 @@ const JoinEUIPrefixesField = function({
       warning={Boolean(error) ? m.prefixesFetchingFailure : undefined}
       prefixes={prefixes}
       showPrefixes={showPrefixes}
+      {...rest}
     />
   )
 }
