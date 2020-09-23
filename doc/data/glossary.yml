@@ -259,3 +259,9 @@
 - term: Fixed Channel
   description: A Band which uses Fixed Channels (i.e. US902, AU915) uses a Channel Mask (ChMask) to enable and disable channels.
   link: https://lora-alliance.org/sites/default/files/2018-07/lorawan1.0.3.pdf#page=50
+
+- term: Join Server
+  description: A Join Server is a component of the LoRaWAN server defined in the LoRa Alliance® specification. The Things Stack contains a Join Server, which is used by default unless an External Join Server is specified. The Join Server's role is to store root keys, generate session keys, and to send those securely to the Network Server and Application Server of choice. The device contains the same root keys, which can be provisioned as part of assembly, distribution or upon installation. An External Join Server allows for secure end device provisioning without network lock-in. The buyer uses a device claiming procedure to transfer ownership in the Join Server.
+  link: https://lora-alliance.org/sites/default/files/2018-04/lorawantm-backend-interfaces-v1.0.pdf
+
+
