@@ -26,73 +26,40 @@ const m = defineMessages({
   prefixesFetchingFailure: 'Prefixes unavailable',
 })
 
-const JoinEUIPrefixesField = function({
-  name,
-  title,
-  description,
-  required,
-  horizontal,
-  autoFocus,
-  disabled,
-  prefixes,
-  error,
-  fetching,
-  getPrefixes,
-  showPrefixes,
-  ...rest
-}) {
+const JoinEUIPrefixesField = function({ error, getPrefixes, ...rest }) {
   useEffect(() => {
     getPrefixes()
   }, [getPrefixes])
 
   return (
     <Field
-      name={name}
-      title={title}
-      description={description}
-      required={required}
-      autoFocus={autoFocus}
-      horizontal={horizontal}
-      component={JoinEUIPrefixesInput}
-      disabled={disabled}
-      fetching={fetching}
-      warning={Boolean(error) ? m.prefixesFetchingFailure : undefined}
-      prefixes={prefixes}
-      showPrefixes={showPrefixes}
       {...rest}
+      component={JoinEUIPrefixesInput}
+      warning={Boolean(error) ? m.prefixesFetchingFailure : undefined}
     />
   )
 }
 
+const { component, ...fieldPropTypes } = Field.propTypes
+const { id, ...inputPropTypes } = JoinEUIPrefixesInput.propTypes
+
 JoinEUIPrefixesField.propTypes = {
-  autoFocus: PropTypes.bool,
-  description: PropTypes.message,
-  disabled: PropTypes.bool,
-  error: PropTypes.error,
+  ...inputPropTypes,
+  ...fieldPropTypes,
   fetching: PropTypes.bool.isRequired,
   getPrefixes: PropTypes.func.isRequired,
-  horizontal: PropTypes.bool,
-  name: PropTypes.string.isRequired,
   prefixes: PropTypes.arrayOf(
     PropTypes.shape({
       prefix: PropTypes.string,
       length: PropTypes.number,
     }),
   ),
-  required: PropTypes.bool,
   showPrefixes: PropTypes.bool,
-  title: PropTypes.message.isRequired,
 }
 
 JoinEUIPrefixesField.defaultProps = {
-  required: false,
-  horizontal: false,
-  autoFocus: false,
-  disabled: false,
   prefixes: [],
-  error: undefined,
   showPrefixes: true,
-  description: undefined,
 }
 
 export default connect(JoinEUIPrefixesField)
