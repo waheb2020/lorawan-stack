@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add `the-things-stack` device template converter, enabled by default. Effectively, this allows importing end devices from the Console.
+- GCS endpoint to download UDP gateway configuration file.
+
 ### Changed
 
 - Decoded downlink payloads are now published as part of downlink attempt events.
